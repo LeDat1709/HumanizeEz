@@ -113,6 +113,17 @@ export default function Home() {
         </div>
       )}
 
+      <div className="mt-8 bg-blue-50 border-2 border-blue-200 rounded-xl p-6">
+        <h3 className="text-lg font-semibold text-gray-700 mb-2">
+          ℹ️ Giới hạn sử dụng
+        </h3>
+        <ul className="text-gray-600 space-y-1">
+          <li>• Tối đa 10 requests mỗi phút</li>
+          <li>• Tối đa 5000 ký tự mỗi lần</li>
+          <li>• Miễn phí cho mọi người sử dụng</li>
+        </ul>
+      </div>
+
       <footer className="mt-12 text-center text-gray-600">
         <p>Powered by Groq API 🚀 | Model: llama-3.3-70b-versatile</p>
       </footer>

@@ -5,13 +5,50 @@ const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 })
 
+// Simple in-memory rate limiting
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>()
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now()
+  const limit = rateLimitMap.get(ip)
+
+  if (!limit || now > limit.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + 60000 }) // 1 phút
+    return true
+  }
+
+  if (limit.count >= 10) { // Giới hạn 10 requests/phút
+    return false
+  }
+
+  limit.count++
+  return true
+}
+
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting
+    const ip = request.headers.get('x-forwarded-for') || 'unknown'
+    if (!checkRateLimit(ip)) {
+      return NextResponse.json(
+        { error: 'Quá nhiều requests. Vui lòng đợi 1 phút.' },
+        { status: 429 }
+      )
+    }
+
     const { text } = await request.json()
 
     if (!text || typeof text !== 'string') {
       return NextResponse.json(
         { error: 'Text không hợp lệ' },
+        { status: 400 }
+      )
+    }
+
+    // Giới hạn độ dài text
+    if (text.length > 5000) {
+      return NextResponse.json(
+        { error: 'Text quá dài. Tối đa 5000 ký tự.' },
         { status: 400 }
       )
     }
